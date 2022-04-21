@@ -2,7 +2,8 @@ package glispext
 
 import (
 	"errors"
-	"github.com/zhemao/glisp/interpreter"
+
+	glisp "github.com/zhemao/glisp/interpreter"
 )
 
 type SexpCoroutine struct {
@@ -17,7 +18,9 @@ func StartCoroutineFunction(env *glisp.Glisp, name string,
 	args []glisp.Sexp) (glisp.Sexp, error) {
 	switch t := args[0].(type) {
 	case SexpCoroutine:
-		go t.env.Run()
+		go func() {
+			_, _ = t.env.Run()
+		}()
 	default:
 		return glisp.SexpNull, errors.New("not a coroutine")
 	}

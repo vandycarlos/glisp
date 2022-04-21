@@ -7,14 +7,14 @@ import (
 	"os"
 )
 
-var WrongNargs error = errors.New("wrong number of arguments")
+var ErrWrongNargs error = errors.New("wrong number of arguments")
 
 type GlispFunction []Instruction
 type GlispUserFunction func(*Glisp, string, []Sexp) (Sexp, error)
 
 func CompareFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 2 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	res, err := Compare(args[0], args[1])
@@ -43,7 +43,7 @@ func CompareFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func BinaryIntFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 2 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	var op IntegerOp
@@ -63,7 +63,7 @@ func BinaryIntFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func BitwiseFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 2 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	var op IntegerOp
@@ -90,7 +90,7 @@ func BitwiseFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func ComplementFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	switch t := args[0].(type) {
@@ -100,12 +100,12 @@ func ComplementFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 		return ^t, nil
 	}
 
-	return SexpNull, errors.New("Argument to bit-not should be integer")
+	return SexpNull, errors.New("argument to bit-not should be integer")
 }
 
 func NumericFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) < 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	var err error
@@ -133,7 +133,7 @@ func NumericFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func ConsFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 2 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	return Cons(args[0], args[1]), nil
@@ -141,7 +141,7 @@ func ConsFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func FirstFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	switch expr := args[0].(type) {
@@ -151,12 +151,12 @@ func FirstFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 		return expr[0], nil
 	}
 
-	return SexpNull, WrongType
+	return SexpNull, ErrWrongType
 }
 
 func RestFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	switch expr := args[0].(type) {
@@ -173,12 +173,12 @@ func RestFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 		}
 	}
 
-	return SexpNull, WrongType
+	return SexpNull, ErrWrongType
 }
 
 func ArrayAccessFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) < 2 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	var arr SexpArray
@@ -186,7 +186,7 @@ func ArrayAccessFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	case SexpArray:
 		arr = t
 	default:
-		return SexpNull, errors.New("First argument of aget must be array")
+		return SexpNull, errors.New("first argument of aget must be array")
 	}
 
 	var i int
@@ -196,11 +196,11 @@ func ArrayAccessFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	case SexpChar:
 		i = int(t)
 	default:
-		return SexpNull, errors.New("Second argument of aget must be integer")
+		return SexpNull, errors.New("fecond argument of aget must be integer")
 	}
 
 	if i < 0 || i >= len(arr) {
-		return SexpNull, errors.New("Array index out of bounds")
+		return SexpNull, errors.New("array index out of bounds")
 	}
 
 	if name == "aget" {
@@ -208,7 +208,7 @@ func ArrayAccessFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	}
 
 	if len(args) != 3 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 	arr[i] = args[2]
 
@@ -217,7 +217,7 @@ func ArrayAccessFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func SgetFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 2 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	var str SexpStr
@@ -225,7 +225,7 @@ func SgetFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	case SexpStr:
 		str = t
 	default:
-		return SexpNull, errors.New("First argument of sget must be string")
+		return SexpNull, errors.New("first argument of sget must be string")
 	}
 
 	var i int
@@ -235,7 +235,7 @@ func SgetFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	case SexpChar:
 		i = int(t)
 	default:
-		return SexpNull, errors.New("Second argument of sget must be integer")
+		return SexpNull, errors.New("second argument of sget must be integer")
 	}
 
 	return SexpChar(str[i]), nil
@@ -243,7 +243,7 @@ func SgetFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func HashAccessFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) < 2 || len(args) > 3 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	var hash SexpHash
@@ -265,7 +265,7 @@ func HashAccessFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 		return SexpNull, err
 	case "hdel!":
 		if len(args) != 2 {
-			return SexpNull, WrongNargs
+			return SexpNull, ErrWrongNargs
 		}
 		err := hash.HashDelete(args[1])
 		return SexpNull, err
@@ -276,7 +276,7 @@ func HashAccessFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func SliceFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 3 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	var start int
@@ -287,7 +287,7 @@ func SliceFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	case SexpChar:
 		start = int(t)
 	default:
-		return SexpNull, errors.New("Second argument of slice must be integer")
+		return SexpNull, errors.New("second argument of slice must be integer")
 	}
 
 	switch t := args[2].(type) {
@@ -296,7 +296,7 @@ func SliceFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	case SexpChar:
 		end = int(t)
 	default:
-		return SexpNull, errors.New("Third argument of slice must be integer")
+		return SexpNull, errors.New("third argument of slice must be integer")
 	}
 
 	switch t := args[0].(type) {
@@ -306,12 +306,12 @@ func SliceFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 		return SexpStr(t[start:end]), nil
 	}
 
-	return SexpNull, errors.New("First argument of slice must be array or string")
+	return SexpNull, errors.New("first argument of slice must be array or string")
 }
 
 func LenFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	switch t := args[0].(type) {
@@ -328,7 +328,7 @@ func LenFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func AppendFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 2 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	switch t := args[0].(type) {
@@ -338,12 +338,12 @@ func AppendFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 		return AppendStr(t, args[1])
 	}
 
-	return SexpNull, errors.New("First argument of append must be array or string")
+	return SexpNull, errors.New("first argument of append must be array or string")
 }
 
 func ConcatFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 2 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	switch t := args[0].(type) {
@@ -360,14 +360,14 @@ func ConcatFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func ReadFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 	str := ""
 	switch t := args[0].(type) {
 	case SexpStr:
 		str = string(t)
 	default:
-		return SexpNull, WrongType
+		return SexpNull, ErrWrongType
 	}
 	lexer := NewLexerFromStream(bytes.NewBuffer([]byte(str)))
 	parser := Parser{lexer, env}
@@ -376,7 +376,7 @@ func ReadFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func EvalFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 	newenv := env.Duplicate()
 	err := newenv.LoadExpressions(args)
@@ -389,7 +389,7 @@ func EvalFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func TypeQueryFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	var result bool
@@ -426,7 +426,7 @@ func TypeQueryFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func PrintFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	var str string
@@ -450,7 +450,7 @@ func PrintFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func NotFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	result := SexpBool(!IsTruthy(args[0]))
@@ -459,7 +459,7 @@ func NotFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func ApplyFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 2 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 	var fun SexpFunction
 	var funargs SexpArray
@@ -489,7 +489,7 @@ func ApplyFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func MapFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 2 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 	var fun SexpFunction
 
@@ -511,7 +511,7 @@ func MapFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func MakeArrayFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) < 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	var size int
@@ -551,7 +551,7 @@ func ConstructorFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func SymnumFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	switch t := args[0].(type) {
@@ -563,7 +563,7 @@ func SymnumFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 
 func SourceFileFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) < 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	var sourceItem func(item Sexp) error
@@ -697,7 +697,7 @@ var BuiltinFunctions = map[string]GlispUserFunction{
 
 func StringifyFunction(env *Glisp, name string, args []Sexp) (Sexp, error) {
 	if len(args) != 1 {
-		return SexpNull, WrongNargs
+		return SexpNull, ErrWrongNargs
 	}
 
 	return SexpStr(args[0].SexpString()), nil

@@ -31,15 +31,14 @@ func regexpFindIndex(
 func RegexpFind(env *glisp.Glisp, name string,
 	args []glisp.Sexp) (glisp.Sexp, error) {
 	if len(args) != 2 {
-		return glisp.SexpNull, glisp.WrongNargs
+		return glisp.SexpNull, glisp.ErrWrongNargs
 	}
 	var haystack string
 	switch t := args[1].(type) {
 	case glisp.SexpStr:
 		haystack = string(t)
 	default:
-		return glisp.SexpNull,
-			errors.New(fmt.Sprintf("2nd argument of %v should be a string", name))
+		return glisp.SexpNull, fmt.Errorf("2nd argument of %v should be a string", name)
 	}
 
 	var needle regexp.Regexp
@@ -47,8 +46,7 @@ func RegexpFind(env *glisp.Glisp, name string,
 	case SexpRegexp:
 		needle = regexp.Regexp(t)
 	default:
-		return glisp.SexpNull,
-			errors.New(fmt.Sprintf("1st argument of %v should be a compiled regular expression", name))
+		return glisp.SexpNull, fmt.Errorf("1st argument of %v should be a compiled regular expression", name)
 	}
 
 	switch name {
@@ -68,7 +66,7 @@ func RegexpFind(env *glisp.Glisp, name string,
 func RegexpCompile(env *glisp.Glisp, name string,
 	args []glisp.Sexp) (glisp.Sexp, error) {
 	if len(args) < 1 {
-		return glisp.SexpNull, glisp.WrongNargs
+		return glisp.SexpNull, glisp.ErrWrongNargs
 	}
 
 	var re string
@@ -83,8 +81,7 @@ func RegexpCompile(env *glisp.Glisp, name string,
 	r, err := regexp.Compile(re)
 
 	if err != nil {
-		return glisp.SexpNull, errors.New(
-			fmt.Sprintf("error during regexp-compile: '%v'", err))
+		return glisp.SexpNull, fmt.Errorf("error during regexp-compile: '%v'", err)
 	}
 
 	return glisp.Sexp(SexpRegexp(*r)), nil

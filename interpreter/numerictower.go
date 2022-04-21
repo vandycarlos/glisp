@@ -16,7 +16,7 @@ const (
 	BitXor
 )
 
-var WrongType error = errors.New("operands have invalid type")
+var ErrWrongType error = errors.New("operands have invalid type")
 
 func IntegerDo(op IntegerOp, a, b Sexp) (Sexp, error) {
 	var ia SexpInt
@@ -28,7 +28,7 @@ func IntegerDo(op IntegerOp, a, b Sexp) (Sexp, error) {
 	case SexpChar:
 		ia = SexpInt(i)
 	default:
-		return SexpNull, WrongType
+		return SexpNull, ErrWrongType
 	}
 
 	switch i := b.(type) {
@@ -37,7 +37,7 @@ func IntegerDo(op IntegerOp, a, b Sexp) (Sexp, error) {
 	case SexpChar:
 		ib = SexpInt(i)
 	default:
-		return SexpNull, WrongType
+		return SexpNull, ErrWrongType
 	}
 
 	switch op {
@@ -110,7 +110,7 @@ func NumericMatchFloat(op NumericOp, a SexpFloat, b Sexp) (Sexp, error) {
 	case SexpChar:
 		fb = SexpFloat(tb)
 	default:
-		return SexpNull, WrongType
+		return SexpNull, ErrWrongType
 	}
 	return NumericFloatDo(op, a, fb), nil
 }
@@ -124,7 +124,7 @@ func NumericMatchInt(op NumericOp, a SexpInt, b Sexp) (Sexp, error) {
 	case SexpChar:
 		return NumericIntDo(op, a, SexpInt(tb)), nil
 	}
-	return SexpNull, WrongType
+	return SexpNull, ErrWrongType
 }
 
 func NumericMatchChar(op NumericOp, a SexpChar, b Sexp) (Sexp, error) {
@@ -137,7 +137,7 @@ func NumericMatchChar(op NumericOp, a SexpChar, b Sexp) (Sexp, error) {
 	case SexpChar:
 		res = NumericIntDo(op, SexpInt(a), SexpInt(tb))
 	default:
-		return SexpNull, WrongType
+		return SexpNull, ErrWrongType
 	}
 	switch tres := res.(type) {
 	case SexpFloat:
@@ -157,5 +157,5 @@ func NumericDo(op NumericOp, a, b Sexp) (Sexp, error) {
 	case SexpChar:
 		return NumericMatchChar(op, ta, b)
 	}
-	return SexpNull, WrongType
+	return SexpNull, ErrWrongType
 }

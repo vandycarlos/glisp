@@ -14,11 +14,11 @@ type Generator struct {
 }
 
 type Loop struct {
-	stmtname       SexpSymbol
-	loopStart      int
-	loopLen        int
-	breakOffset    int // i.e. relative to loopStart
-	continueOffset int // i.e. relative to loopStart
+	// stmtname       SexpSymbol
+	// loopStart      int
+	// loopLen        int
+	// breakOffset    int // i.e. relative to loopStart
+	// continueOffset int // i.e. relative to loopStart
 }
 
 func (loop *Loop) IsStackElem() {}
@@ -47,7 +47,7 @@ func (gen *Generator) GenerateBegin(expressions []Sexp) error {
 	oldtail := gen.tail
 	gen.tail = false
 	if size == 0 {
-		return errors.New("No expressions found")
+		return errors.New("no expressions found")
 	}
 	for _, expr := range expressions[:size-1] {
 		err := gen.Generate(expr)
@@ -134,7 +134,7 @@ func (gen *Generator) GenerateFn(args []Sexp) error {
 
 func (gen *Generator) GenerateDef(args []Sexp) error {
 	if len(args) != 2 {
-		return errors.New("Wrong number of arguments to def")
+		return errors.New("wrong number of arguments to def")
 	}
 
 	var sym SexpSymbol
@@ -142,7 +142,7 @@ func (gen *Generator) GenerateDef(args []Sexp) error {
 	case SexpSymbol:
 		sym = expr
 	default:
-		return errors.New("Definition name must by symbol")
+		return errors.New("definition name must by symbol")
 	}
 
 	gen.tail = false
@@ -157,7 +157,7 @@ func (gen *Generator) GenerateDef(args []Sexp) error {
 
 func (gen *Generator) GenerateDefn(args []Sexp) error {
 	if len(args) < 3 {
-		return errors.New("Wrong number of arguments to defn")
+		return errors.New("wrong number of arguments to defn")
 	}
 
 	var funcargs SexpArray
@@ -173,7 +173,7 @@ func (gen *Generator) GenerateDefn(args []Sexp) error {
 	case SexpSymbol:
 		sym = expr
 	default:
-		return errors.New("Definition name must by symbol")
+		return errors.New("definition name must by symbol")
 	}
 
 	sfun, err := buildSexpFun(gen.env, sym.name, funcargs, args[2:])
@@ -190,7 +190,7 @@ func (gen *Generator) GenerateDefn(args []Sexp) error {
 
 func (gen *Generator) GenerateDefmac(args []Sexp) error {
 	if len(args) < 3 {
-		return errors.New("Wrong number of arguments to defmac")
+		return errors.New("wrong number of arguments to defmac")
 	}
 
 	var funcargs SexpArray
@@ -206,7 +206,7 @@ func (gen *Generator) GenerateDefmac(args []Sexp) error {
 	case SexpSymbol:
 		sym = expr
 	default:
-		return errors.New("Definition name must by symbol")
+		return errors.New("definition name must by symbol")
 	}
 
 	sfun, err := buildSexpFun(gen.env, sym.name, funcargs, args[2:])
@@ -222,7 +222,7 @@ func (gen *Generator) GenerateDefmac(args []Sexp) error {
 
 func (gen *Generator) GenerateMacexpand(args []Sexp) error {
 	if len(args) != 1 {
-		return WrongNargs
+		return ErrWrongNargs
 	}
 
 	var list SexpPair
@@ -275,12 +275,12 @@ func (gen *Generator) GenerateShortCircuit(or bool, args []Sexp) error {
 	subgen.scopes = gen.scopes
 	subgen.tail = gen.tail
 	subgen.funcname = gen.funcname
-	subgen.Generate(args[size-1])
+	_ = subgen.Generate(args[size-1])
 	instructions := subgen.instructions
 
 	for i := size - 2; i >= 0; i-- {
 		subgen = NewGenerator(gen.env)
-		subgen.Generate(args[i])
+		_ = subgen.Generate(args[i])
 		subgen.AddInstruction(DupInstr(0))
 		subgen.AddInstruction(BranchInstr{or, len(instructions) + 2})
 		subgen.AddInstruction(PopInstr(0))
@@ -408,7 +408,7 @@ func (gen *Generator) GenerateLet(name string, args []Sexp) error {
 
 func (gen *Generator) GenerateAssert(args []Sexp) error {
 	if len(args) != 1 {
-		return WrongNargs
+		return ErrWrongNargs
 	}
 	err := gen.Generate(args[0])
 	if err != nil {
@@ -425,7 +425,7 @@ func (gen *Generator) GenerateAssert(args []Sexp) error {
 
 func (gen *Generator) GenerateInclude(args []Sexp) error {
 	if len(args) < 1 {
-		return WrongNargs
+		return ErrWrongNargs
 	}
 
 	var err error
@@ -546,8 +546,8 @@ func (gen *Generator) GenerateCallBySymbol(sym SexpSymbol, args []Sexp) error {
 }
 
 func (gen *Generator) GenerateDispatch(fun Sexp, args []Sexp) error {
-	gen.GenerateAll(args)
-	gen.Generate(fun)
+	_ = gen.GenerateAll(args)
+	_ = gen.Generate(fun)
 	gen.AddInstruction(DispatchInstr{len(args)})
 	return nil
 }
@@ -579,9 +579,7 @@ func (gen *Generator) Generate(expr Sexp) error {
 		if IsList(e) {
 			err := gen.GenerateCall(e)
 			if err != nil {
-				return errors.New(
-					fmt.Sprintf("Error generating %s:\n%v",
-						expr.SexpString(), err))
+				return fmt.Errorf("error generating %s:\n%v", expr.SexpString(), err)
 			}
 			return nil
 		} else {
@@ -625,16 +623,16 @@ func (gen *Generator) GenerateSyntaxQuote(args []Sexp) error {
 	// in them too.
 	switch arg.(type) {
 	case SexpArray:
-		gen.generateSyntaxQuoteArray(arg)
+		_ = gen.generateSyntaxQuoteArray(arg)
 		return nil
 	case SexpPair:
 		if !IsList(arg) {
 			break
 		}
-		gen.generateSyntaxQuoteList(arg)
+		_ = gen.generateSyntaxQuoteList(arg)
 		return nil
 	case SexpHash:
-		gen.generateSyntaxQuoteHash(arg)
+		_ = gen.generateSyntaxQuoteHash(arg)
 		return nil
 	}
 	gen.AddInstruction(PushInstr{arg})
@@ -670,10 +668,10 @@ func (gen *Generator) generateSyntaxQuoteList(arg Sexp) error {
 		}
 		if issymbol {
 			if sym.name == "unquote" {
-				gen.Generate(quotebody[1])
+				_ = gen.Generate(quotebody[1])
 				return nil
 			} else if sym.name == "unquote-splicing" {
-				gen.Generate(quotebody[1])
+				_ = gen.Generate(quotebody[1])
 				gen.AddInstruction(ExplodeInstr(0))
 				return nil
 			}
@@ -683,7 +681,7 @@ func (gen *Generator) generateSyntaxQuoteList(arg Sexp) error {
 	gen.AddInstruction(PushInstr{SexpMarker})
 
 	for _, expr := range quotebody {
-		gen.GenerateSyntaxQuote([]Sexp{expr})
+		_ = gen.GenerateSyntaxQuote([]Sexp{expr})
 	}
 
 	gen.AddInstruction(SquashInstr(0))
@@ -705,7 +703,7 @@ func (gen *Generator) generateSyntaxQuoteArray(arg Sexp) error {
 	gen.AddInstruction(PushInstr{SexpMarker})
 	for _, expr := range arr {
 		gen.AddInstruction(PushInstr{SexpMarker})
-		gen.GenerateSyntaxQuote([]Sexp{expr})
+		_ = gen.GenerateSyntaxQuote([]Sexp{expr})
 		gen.AddInstruction(SquashInstr(0))
 		gen.AddInstruction(ExplodeInstr(0))
 	}
@@ -734,12 +732,12 @@ func (gen *Generator) generateSyntaxQuoteHash(arg Sexp) error {
 		}
 		// value first, since value comes second on rebuild
 		gen.AddInstruction(PushInstr{SexpMarker})
-		gen.GenerateSyntaxQuote([]Sexp{val})
+		_ = gen.GenerateSyntaxQuote([]Sexp{val})
 		gen.AddInstruction(SquashInstr(0))
 		gen.AddInstruction(ExplodeInstr(0))
 
 		gen.AddInstruction(PushInstr{SexpMarker})
-		gen.GenerateSyntaxQuote([]Sexp{key})
+		_ = gen.GenerateSyntaxQuote([]Sexp{key})
 		gen.AddInstruction(SquashInstr(0))
 		gen.AddInstruction(ExplodeInstr(0))
 	}

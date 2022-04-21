@@ -14,7 +14,7 @@ type JumpInstr struct {
 	location int
 }
 
-var OutOfBounds error = errors.New("jump out of bounds")
+var ErrOutOfBounds error = errors.New("jump out of bounds")
 
 func (j JumpInstr) InstrString() string {
 	return fmt.Sprintf("jump %d", j.location)
@@ -23,7 +23,7 @@ func (j JumpInstr) InstrString() string {
 func (j JumpInstr) Execute(env *Glisp) error {
 	newpc := env.pc + j.location
 	if newpc < 0 || newpc > env.CurrentFunctionSize() {
-		return OutOfBounds
+		return ErrOutOfBounds
 	}
 	env.pc = newpc
 	return nil
@@ -39,7 +39,7 @@ func (g GotoInstr) InstrString() string {
 
 func (g GotoInstr) Execute(env *Glisp) error {
 	if g.location < 0 || g.location > env.CurrentFunctionSize() {
-		return OutOfBounds
+		return ErrOutOfBounds
 	}
 	env.pc = g.location
 	return nil
@@ -104,7 +104,7 @@ func (p PushInstrClosure) Execute(env *Glisp) error {
 
 			exp, err = env.scopestack.LookupSymbolNonGlobal(sym)
 			if err == nil {
-				p.expr.closeScope.BindSymbol(sym, exp)
+				_ = p.expr.closeScope.BindSymbol(sym, exp)
 			}
 		}
 	} else {
@@ -219,7 +219,7 @@ func (c CallInstr) Execute(env *Glisp) error {
 		}
 		return env.CallUserFunction(f, c.sym.name, c.nargs)
 	}
-	return errors.New(fmt.Sprintf("%s is not a function", c.sym.name))
+	return fmt.Errorf("%s is not a function", c.sym.name)
 }
 
 type DispatchInstr struct {
@@ -367,7 +367,7 @@ func (b BindlistInstr) Execute(env *Glisp) error {
 	}
 
 	for i, bindThisSym := range b.syms {
-		env.scopestack.BindSymbol(bindThisSym, arr[i])
+		_ = env.scopestack.BindSymbol(bindThisSym, arr[i])
 	}
 	env.pc++
 	return nil

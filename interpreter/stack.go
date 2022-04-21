@@ -25,9 +25,7 @@ func (stack *Stack) Clone() *Stack {
 	ret := &Stack{}
 	ret.tos = stack.tos
 	ret.elements = make([]StackElem, len(stack.elements))
-	for i := range stack.elements {
-		ret.elements[i] = stack.elements[i]
-	}
+	copy(ret.elements, stack.elements)
 
 	return ret
 }

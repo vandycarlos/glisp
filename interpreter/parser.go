@@ -11,7 +11,7 @@ type Parser struct {
 	env   *Glisp
 }
 
-var UnexpectedEnd error = errors.New("Unexpected end of input")
+var ErrUnexpectedEnd error = errors.New("unexpected end of input")
 
 const SliceDefaultCap = 10
 
@@ -23,7 +23,7 @@ func ParseList(parser *Parser) (Sexp, error) {
 	}
 	if tok.typ == TokenEnd {
 		_, _ = lexer.GetNextToken()
-		return SexpEnd, UnexpectedEnd
+		return SexpEnd, ErrUnexpectedEnd
 	}
 
 	if tok.typ == TokenRParen {
@@ -86,7 +86,7 @@ func ParseArray(parser *Parser) (Sexp, error) {
 		}
 
 		if tok.typ == TokenEnd {
-			return SexpEnd, UnexpectedEnd
+			return SexpEnd, ErrUnexpectedEnd
 		}
 
 		if tok.typ == TokenRSquare {
@@ -115,7 +115,7 @@ func ParseHash(parser *Parser) (Sexp, error) {
 			return SexpEnd, err
 		}
 		if tok.typ == TokenEnd {
-			return SexpEnd, UnexpectedEnd
+			return SexpEnd, ErrUnexpectedEnd
 		}
 		if tok.typ == TokenRCurly {
 			// pop off the }

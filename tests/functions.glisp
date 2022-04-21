@@ -1,5 +1,4 @@
-(assert (= 3
-  ((fn [a b] a) 3 2)))
+(assert (= 3 ((fn [a b] a) 3 2)))
 
 (defn add4 [a] (+ a 4))
 

@@ -22,13 +22,12 @@ func HashExpression(expr Sexp) (int, error) {
 		}
 		return int(hasher.Sum32()), nil
 	}
-	return 0, errors.New(fmt.Sprintf("cannot hash type %T", expr))
+	return 0, fmt.Errorf("cannot hash type %T", expr)
 }
 
 func MakeHash(args []Sexp, typename string) (SexpHash, error) {
 	if len(args)%2 != 0 {
-		return SexpHash{},
-			errors.New("hash requires even number of arguments")
+		return SexpHash{}, errors.New("hash requires even number of arguments")
 	}
 
 	var iface interface{}

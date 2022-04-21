@@ -134,9 +134,7 @@ func (env *Glisp) CurrentFunctionSize() int {
 
 func (env *Glisp) wrangleOptargs(fnargs, nargs int) error {
 	if nargs < fnargs {
-		return errors.New(
-			fmt.Sprintf("Expected >%d arguments, got %d",
-				fnargs, nargs))
+		return fmt.Errorf("expected >%d arguments, got %d", fnargs, nargs)
 	}
 	if nargs > fnargs {
 		optargs, err := env.datastack.PopExpressions(nargs - fnargs)
@@ -165,9 +163,7 @@ func (env *Glisp) CallFunction(function SexpFunction, nargs int) error {
 			return err
 		}
 	} else if nargs != function.nargs {
-		return errors.New(
-			fmt.Sprintf("%s expected %d arguments, got %d",
-				function.name, function.nargs, nargs))
+		return fmt.Errorf("%s expected %d arguments, got %d", function.name, function.nargs, nargs)
 	}
 
 	if env.scopestack.IsEmpty() {
@@ -226,8 +222,7 @@ func (env *Glisp) CallUserFunction(
 
 	args, err := env.datastack.PopExpressions(nargs)
 	if err != nil {
-		return errors.New(
-			fmt.Sprintf("Error calling %s: %v", name, err))
+		return fmt.Errorf("error calling %s: %v", name, err)
 	}
 
 	env.addrstack.PushAddr(env.curfunc, env.pc+1)
@@ -236,8 +231,7 @@ func (env *Glisp) CallUserFunction(
 
 	res, err := function.userfun(env, name, args)
 	if err != nil {
-		return errors.New(
-			fmt.Sprintf("Error calling %s: %v", name, err))
+		return fmt.Errorf("error calling %s: %v", name, err)
 	}
 	env.datastack.PushExpr(res)
 
@@ -257,7 +251,7 @@ func (env *Glisp) ParseStream(in io.Reader) ([]Sexp, error) {
 
 	exp, err = ParseTokens(env, lexer)
 	if err != nil {
-		return nil, fmt.Errorf("Error on line %d: %v\n", lexer.Linenum(), err)
+		return nil, fmt.Errorf("error on line %d: %v", lexer.Linenum(), err)
 	}
 
 	return exp, nil
@@ -301,7 +295,7 @@ func (env *Glisp) SourceExpressions(expressions []Sexp) error {
 		return err
 	}
 
-	env.datastack.PopExpr()
+	_, _ = env.datastack.PopExpr()
 
 	env.pc = curpc
 	env.curfunc = curfunc
@@ -390,7 +384,7 @@ func (env *Glisp) ImportEval() {
 func (env *Glisp) DumpFunctionByName(name string) error {
 	obj, found := env.FindObject(name)
 	if !found {
-		return errors.New(fmt.Sprintf("%q not found", name))
+		return fmt.Errorf("%q not found", name)
 	}
 
 	var fun GlispFunction

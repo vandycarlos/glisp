@@ -4,11 +4,11 @@ import (
 	"errors"
 )
 
-var NotAList = errors.New("not a list")
+var ErrNotAList = errors.New("not a list")
 
 func ListToArray(expr Sexp) ([]Sexp, error) {
 	if !IsList(expr) {
-		return nil, NotAList
+		return nil, ErrNotAList
 	}
 	arr := make([]Sexp, 0)
 
@@ -39,7 +39,7 @@ func MapList(env *Glisp, fun SexpFunction, expr Sexp) (Sexp, error) {
 	case SexpPair:
 		list = e
 	default:
-		return SexpNull, NotAList
+		return SexpNull, ErrNotAList
 	}
 
 	var err error
@@ -61,7 +61,7 @@ func MapList(env *Glisp, fun SexpFunction, expr Sexp) (Sexp, error) {
 
 func ConcatList(a SexpPair, b Sexp) (Sexp, error) {
 	if !IsList(b) {
-		return SexpNull, NotAList
+		return SexpNull, ErrNotAList
 	}
 
 	if a.tail == SexpNull {
@@ -77,5 +77,5 @@ func ConcatList(a SexpPair, b Sexp) (Sexp, error) {
 		return Cons(a.head, newtail), nil
 	}
 
-	return SexpNull, NotAList
+	return SexpNull, ErrNotAList
 }

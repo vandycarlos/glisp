@@ -103,8 +103,8 @@ var (
 	OctRegex     = regexp.MustCompile("^0o[0-7]+$")
 	BinaryRegex  = regexp.MustCompile("^0b[01]+$")
 	SymbolRegex  = regexp.MustCompile("^[^'#]+$")
-	CharRegex    = regexp.MustCompile("^#\\\\?.$")
-	FloatRegex   = regexp.MustCompile("^-?([0-9]+\\.[0-9]*)|(\\.[0-9]+)|([0-9]+(\\.[0-9]*)?[eE](-?[0-9]+))$")
+	CharRegex    = regexp.MustCompile(`^#\\?.$`)
+	FloatRegex   = regexp.MustCompile(`^-?([0-9]+\.[0-9]*)|(\.[0-9]+)|([0-9]+(\.[0-9]*)?[eE](-?[0-9]+))$`)
 )
 
 func StringToRunes(str string) []rune {
@@ -187,7 +187,7 @@ func DecodeAtom(atom string) (Token, error) {
 		return Token{TokenChar, char}, nil
 	}
 
-	return Token{}, errors.New("Unrecognized atom")
+	return Token{}, errors.New("unrecognized atom")
 }
 
 func (lexer *Lexer) dumpBuffer() error {
@@ -273,7 +273,7 @@ func (lexer *Lexer) LexNextRune(r rune) error {
 
 	if r == '"' {
 		if lexer.buffer.Len() > 0 {
-			return errors.New("Unexpected quote")
+			return errors.New("unexpected quote")
 		}
 		lexer.state = LexerStrLit
 		return nil
@@ -286,7 +286,7 @@ func (lexer *Lexer) LexNextRune(r rune) error {
 
 	if r == '\'' {
 		if lexer.buffer.Len() > 0 {
-			return errors.New("Unexpected quote")
+			return errors.New("unexpected quote")
 		}
 		lexer.tokens = append(lexer.tokens, Token{TokenQuote, ""})
 		return nil
@@ -294,7 +294,7 @@ func (lexer *Lexer) LexNextRune(r rune) error {
 
 	if r == '`' {
 		if lexer.buffer.Len() > 0 {
-			return errors.New("Unexpected backtick")
+			return errors.New("unexpected backtick")
 		}
 		lexer.tokens = append(lexer.tokens, Token{TokenBacktick, ""})
 		return nil
@@ -302,7 +302,7 @@ func (lexer *Lexer) LexNextRune(r rune) error {
 
 	if r == '~' {
 		if lexer.buffer.Len() > 0 {
-			return errors.New("Unexpected tilde")
+			return errors.New("unexpected tilde")
 		}
 		lexer.state = LexerUnquote
 		return nil
@@ -343,7 +343,7 @@ func (lexer *Lexer) PeekNextToken() (Token, error) {
 		if err != nil {
 			lexer.finished = true
 			if lexer.buffer.Len() > 0 {
-				lexer.dumpBuffer()
+				_ = lexer.dumpBuffer()
 				return lexer.tokens[0], nil
 			}
 			return Token{TokenEnd, ""}, nil

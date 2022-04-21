@@ -1,9 +1,10 @@
 package glispext
 
 import (
-	"github.com/zhemao/glisp/interpreter"
 	"math/rand"
 	"time"
+
+	glisp "github.com/zhemao/glisp/interpreter"
 )
 
 var defaultRand = rand.New(rand.NewSource(time.Now().Unix()))

@@ -3,8 +3,9 @@ package glispext
 import (
 	"errors"
 	"fmt"
-	"github.com/zhemao/glisp/interpreter"
 	"time"
+
+	glisp "github.com/zhemao/glisp/interpreter"
 )
 
 type SexpTime time.Time
@@ -21,7 +22,7 @@ func TimeFunction(env *glisp.Glisp, name string,
 func TimeitFunction(env *glisp.Glisp, name string,
 	args []glisp.Sexp) (glisp.Sexp, error) {
 	if len(args) != 1 {
-		return glisp.SexpNull, glisp.WrongNargs
+		return glisp.SexpNull, glisp.ErrWrongNargs
 	}
 
 	var fun glisp.SexpFunction
